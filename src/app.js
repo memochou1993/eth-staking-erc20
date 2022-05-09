@@ -33,17 +33,17 @@ class App {
     document.getElementById('totalStakes').textContent = await this.contract.totalStakes();
     document.getElementById('rewardOf').textContent = (await this.contract.rewardOf(this.account)).toNumber();
     document.getElementById('totalRewards').textContent = await this.contract.totalRewards();
- }
+  }
 
   async createStake() {
     const amount = document.getElementById('amount').value;
-    await this.contract.createStake(amount, this.payload())
+    await this.contract.createStake(amount, this.payload());
     window.location.reload();
   }
 
   async removeStake() {
     const amount = document.getElementById('amount').value;
-    await this.contract.removeStake(amount, this.payload())
+    await this.contract.removeStake(amount, this.payload());
     window.location.reload();
   }
 

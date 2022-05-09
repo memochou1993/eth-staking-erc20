@@ -1,5 +1,5 @@
 const Staking = artifacts.require('Staking');
 
-module.exports = function(deployer) {
+module.exports = (deployer) => {
   deployer.deploy(Staking);
 };

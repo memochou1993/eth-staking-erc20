@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "lite-server",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint:sol": "solium -d contracts"
+    "lint:sol": "solium -d contracts",
+    "lint:js": "eslint src migrations",
+    "lint": "npm run lint:sol && npm run lint:js"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +23,9 @@
   },
   "devDependencies": {
     "@truffle/contract": "^4.5.9",
+    "eslint": "^8.15.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "ethlint": "^1.2.5",
     "lite-server": "^2.6.1",
     "web3": "^1.7.3"
   }
