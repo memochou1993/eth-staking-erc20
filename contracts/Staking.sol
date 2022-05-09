@@ -52,8 +52,8 @@ contract Staking is ERC20, Ownable {
         returns (uint256)
     {
         uint256 _totalStakes = 0;
-        for (uint256 s = 0; s < stakeholders.length; s += 1) {
-            _totalStakes = _totalStakes.add(stakes[stakeholders[s]]);
+        for (uint256 i = 0; i < stakeholders.length; i += 1) {
+            _totalStakes = _totalStakes.add(stakes[stakeholders[i]]);
         }
         return _totalStakes;
     }
@@ -63,9 +63,9 @@ contract Staking is ERC20, Ownable {
         view
         returns (bool, uint256)
     {
-        for (uint256 s = 0; s < stakeholders.length; s += 1) {
-            if (_address == stakeholders[s]) {
-                return (true, s);
+        for (uint256 i = 0; i < stakeholders.length; i += 1) {
+            if (_address == stakeholders[i]) {
+                return (true, i);
             }
         }
         return (false, 0);
@@ -104,8 +104,8 @@ contract Staking is ERC20, Ownable {
         returns (uint256)
     {
         uint256 _totalRewards = 0;
-        for (uint256 s = 0; s < stakeholders.length; s += 1) {
-            _totalRewards = _totalRewards.add(rewards[stakeholders[s]]);
+        for (uint256 i = 0; i < stakeholders.length; i += 1) {
+            _totalRewards = _totalRewards.add(rewards[stakeholders[i]]);
         }
         return _totalRewards;
     }
@@ -122,10 +122,9 @@ contract Staking is ERC20, Ownable {
         public
         onlyOwner
     {
-        for (uint256 s = 0; s < stakeholders.length; s += 1) {
-            address stakeholder = stakeholders[s];
-            uint256 reward = calculateReward(stakeholder);
-            rewards[stakeholder] = rewards[stakeholder].add(reward);
+        for (uint256 i = 0; i < stakeholders.length; i += 1) {
+            address stakeholder = stakeholders[i];
+            rewards[stakeholder] = calculateReward(stakeholder);
         }
     }
 
