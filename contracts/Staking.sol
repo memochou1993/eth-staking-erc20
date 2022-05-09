@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: UNLICENSED
-
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -9,18 +8,14 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract Staking is ERC20, Ownable {
     using SafeMath for uint256;
 
-    string private _name;
-    string private _symbol;
+    uint256 public constant INITIAL_SUPPLY = 100000000;
 
     address[] internal stakeholders;
     mapping(address => uint256) internal stakes;
     mapping(address => uint256) internal rewards;
 
-    constructor(string memory name_, string memory symbol_)
-        ERC20(name_, symbol_)
-    {
-        _name = name_;
-        _symbol = symbol_;
+    constructor() ERC20("My Token", "MTK") {
+        _mint(msg.sender, INITIAL_SUPPLY);
     }
 
     function createStake(uint256 _stake)
