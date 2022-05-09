@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -11,6 +11,8 @@ contract Staking is ERC20, Ownable {
     uint256 public constant INITIAL_SUPPLY = 100000000;
 
     address[] internal stakeholders;
+
+    mapping(address => uint256) internal balances; // TODO
     mapping(address => uint256) internal stakes;
     mapping(address => uint256) internal rewards;
 
@@ -118,6 +120,14 @@ contract Staking is ERC20, Ownable {
         return stakes[_stakeholder] / 100;
     }
 
+    function withdrawReward()
+        public
+    {
+        uint256 reward = rewards[msg.sender];
+        rewards[msg.sender] = 0;
+        _mint(msg.sender, reward);
+    }
+
     function distributeRewards()
         public
         onlyOwner
@@ -126,13 +136,5 @@ contract Staking is ERC20, Ownable {
             address stakeholder = stakeholders[i];
             rewards[stakeholder] = calculateReward(stakeholder);
         }
-    }
-
-    function withdrawReward()
-        public
-    {
-        uint256 reward = rewards[msg.sender];
-        rewards[msg.sender] = 0;
-        _mint(msg.sender, reward);
     }
 }
