@@ -10,9 +10,14 @@ contract Staking is ERC20, Ownable {
 
     uint256 public constant INITIAL_SUPPLY = 100000000;
 
+    struct Stake {
+        uint256 amount;
+        uint256 distributedReward;
+        uint256 createdAt;
+    }
+
     address[] internal stakeholders;
-    mapping(address => uint256) internal stakes;
-    mapping(address => uint256) internal rewards;
+    mapping(address => Stake) internal stakes;
 
     constructor() ERC20("My Token", "MTK") {
         _mint(msg.sender, INITIAL_SUPPLY);
@@ -22,40 +27,40 @@ contract Staking is ERC20, Ownable {
         public
     {
         _burn(msg.sender, _amount);
-        if (stakes[msg.sender] == 0) {
+        if (stakes[msg.sender].amount == 0) {
             addStakeholder(msg.sender);
         }
-        stakes[msg.sender] += _amount;
+        stakes[msg.sender].amount += _amount;
+        stakes[msg.sender].createdAt = block.timestamp;
     }
 
-    function removeStake(uint256 _amount)
+    function removeStake()
         public
     {
-        stakes[msg.sender] -= _amount;
-        if (stakes[msg.sender] == 0) {
-            removeStakeholder(msg.sender);
-        }
+        uint256 _amount = stakes[msg.sender].amount;
+        delete stakes[msg.sender];
+        removeStakeholder(msg.sender);
         _mint(msg.sender, _amount);
     }
 
     function stakeOf(address _stakeholder)
         public
         view
-        returns (uint256)
+        returns (Stake memory)
     {
         return stakes[_stakeholder];
     }
 
-    function totalStakes()
+    function totalStakeAmount()
         public
         view
         returns (uint256)
     {
-        uint256 _totalStakes = 0;
+        uint256 _amount = 0;
         for (uint256 i = 0; i < stakeholders.length; i += 1) {
-            _totalStakes += stakes[stakeholders[i]];
+            _amount += stakes[stakeholders[i]].amount;
         }
-        return _totalStakes;
+        return _amount;
     }
 
     function isStakeholder(address _stakeholder)
@@ -83,31 +88,11 @@ contract Staking is ERC20, Ownable {
     function removeStakeholder(address _stakeholder)
         public
     {
-        (bool _isStakeholder, uint256 s) = isStakeholder(_stakeholder);
+        (bool _isStakeholder, uint256 i) = isStakeholder(_stakeholder);
         if (_isStakeholder) {
-            stakeholders[s] = stakeholders[stakeholders.length - 1];
+            stakeholders[i] = stakeholders[stakeholders.length - 1];
             stakeholders.pop();
         }
-    }
-
-    function rewardOf(address _stakeholder)
-        public
-        view
-        returns (uint256)
-    {
-        return rewards[_stakeholder];
-    }
-
-    function totalRewards()
-        public
-        view
-        returns (uint256)
-    {
-        uint256 _totalRewards = 0;
-        for (uint256 i = 0; i < stakeholders.length; i += 1) {
-            _totalRewards += rewards[stakeholders[i]];
-        }
-        return _totalRewards;
     }
 
     function calculateReward(address _stakeholder)
@@ -115,15 +100,7 @@ contract Staking is ERC20, Ownable {
         view
         returns (uint256)
     {
-        return stakes[_stakeholder] / 100;
-    }
-
-    function withdrawReward()
-        public
-    {
-        uint256 reward = rewards[msg.sender];
-        rewards[msg.sender] = 0;
-        _mint(msg.sender, reward);
+        return block.timestamp - stakes[_stakeholder].createdAt - stakes[_stakeholder].distributedReward;
     }
 
     function distributeRewards()
@@ -131,8 +108,9 @@ contract Staking is ERC20, Ownable {
         onlyOwner
     {
         for (uint256 i = 0; i < stakeholders.length; i += 1) {
-            address stakeholder = stakeholders[i];
-            rewards[stakeholder] = calculateReward(stakeholder);
+            uint256 reward = calculateReward(stakeholders[i]);
+            stakes[stakeholders[i]].distributedReward += reward;
+            _mint(msg.sender, reward);
         }
     }
 }
