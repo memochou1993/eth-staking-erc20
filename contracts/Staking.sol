@@ -12,7 +12,6 @@ contract Staking is ERC20, Ownable {
 
     address[] internal stakeholders;
 
-    mapping(address => uint256) internal balances; // TODO
     mapping(address => uint256) internal stakes;
     mapping(address => uint256) internal rewards;
 

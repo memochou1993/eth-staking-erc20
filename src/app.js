@@ -30,19 +30,21 @@ class App {
     document.getElementById('account').textContent = this.account;
     document.getElementById('isStakeholder').textContent = (await this.contract.isStakeholder(this.account))[0];
     document.getElementById('stakeOf').textContent = (await this.contract.stakeOf(this.account)).toNumber();
-    document.getElementById('totalStakes').textContent = await this.contract.totalStakes();
     document.getElementById('rewardOf').textContent = (await this.contract.rewardOf(this.account)).toNumber();
+    document.getElementById('balanceOf').textContent = (await this.contract.balanceOf(this.account)).toNumber();
+    document.getElementById('totalStakes').textContent = await this.contract.totalStakes();
     document.getElementById('totalRewards').textContent = await this.contract.totalRewards();
+    document.getElementById('totalSupply').textContent = await this.contract.totalSupply();
   }
 
   async createStake() {
-    const amount = document.getElementById('amount').value;
+    const amount = document.getElementById('stakeAmount').value;
     await this.contract.createStake(amount, this.payload());
     window.location.reload();
   }
 
   async removeStake() {
-    const amount = document.getElementById('amount').value;
+    const amount = document.getElementById('stakeAmount').value;
     await this.contract.removeStake(amount, this.payload());
     window.location.reload();
   }
@@ -54,6 +56,13 @@ class App {
 
   async distributeRewards() {
     await this.contract.distributeRewards(this.payload());
+    window.location.reload();
+  }
+
+  async transfer() {
+    const to = document.getElementById('to').value;
+    const amount = document.getElementById('transferAmount').value;
+    await this.contract.transfer(to, amount, this.payload());
     window.location.reload();
   }
 

@@ -5,22 +5,36 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>div { margin: 4px 0; }</style>
 </head>
 <body>
     <script src="vendor/web3/dist/web3.min.js"></script>
     <script src="vendor/@truffle/contract/dist/truffle-contract.js"></script>
     <script src="app.js"></script>
-    <input type="number" id="amount" min="0" placeholder="Amount">
-    <button onclick="app.createStake()">Create Stake</button>
-    <button onclick="app.removeStake()">Remove Stake</button>
-    <button onclick="app.withdrawReward()">Withdraw Reward</button>
-    <div>account: <span id="account"></span></div>
-    <div>isStakeholder: <span id="isStakeholder"></span></div>
-    <div>stakeOf: <span id="stakeOf"></span></div>
-    <div>rewardOf: <span id="rewardOf"></span></div>
+    <div>
+        <button onclick="app.createStake()">Create Stake</button>
+        <button onclick="app.removeStake()">Remove Stake</button>
+        <input type="number" id="stakeAmount" min="0" placeholder="Amount">
+    </div>
+    <div>
+        <button onclick="app.transfer()">Transfer</button>
+        <input type="text" id="to" min="0" placeholder="To">
+        <input type="number" id="transferAmount" min="0" placeholder="Amount">
+    </div>
+    <div>
+        <button onclick="app.withdrawReward()">Withdraw Reward</button>
+        <div>account: <span id="account"></span></div>
+        <div>isStakeholder: <span id="isStakeholder"></span></div>
+        <div>stakeOf: <span id="stakeOf"></span></div>
+        <div>rewardOf: <span id="rewardOf"></span></div>
+        <div>balanceOf: <span id="balanceOf"></span></div>
+    </div>
     <hr>
-    <button onclick="app.distributeRewards()">Distribute Rewards</button>
-    <div>totalStakes: <span id="totalStakes"></span></div>
-    <div>totalRewards: <span id="totalRewards"></span></div>
+    <div>
+        <button onclick="app.distributeRewards()">Distribute Rewards</button>
+        <div>totalStakes: <span id="totalStakes"></span></div>
+        <div>totalRewards: <span id="totalRewards"></span></div>
+        <div>totalSupply: <span id="totalSupply"></span></div>
+    </div>
 </body>
 </html>
