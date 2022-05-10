@@ -11,7 +11,6 @@ contract Staking is ERC20, Ownable {
     uint256 public constant INITIAL_SUPPLY = 100000000;
 
     address[] internal stakeholders;
-
     mapping(address => uint256) internal stakes;
     mapping(address => uint256) internal rewards;
 
@@ -39,12 +38,12 @@ contract Staking is ERC20, Ownable {
         _mint(msg.sender, _stake);
     }
 
-    function stakeOf(address _stakeholder)
+    function stakeOf(address _address)
         public
         view
         returns (uint256)
     {
-        return stakes[_stakeholder];
+        return stakes[_address];
     }
 
     function totalStakes()
@@ -72,31 +71,31 @@ contract Staking is ERC20, Ownable {
         return (false, 0);
     }
 
-    function addStakeholder(address _stakeholder)
+    function addStakeholder(address _address)
         public
     {
-        (bool _isStakeholder, ) = isStakeholder(_stakeholder);
+        (bool _isStakeholder, ) = isStakeholder(_address);
         if (!_isStakeholder) {
-            stakeholders.push(_stakeholder);
+            stakeholders.push(_address);
         }
     }
 
-    function removeStakeholder(address _stakeholder)
+    function removeStakeholder(address _address)
         public
     {
-        (bool _isStakeholder, uint256 s) = isStakeholder(_stakeholder);
+        (bool _isStakeholder, uint256 s) = isStakeholder(_address);
         if (_isStakeholder) {
             stakeholders[s] = stakeholders[stakeholders.length - 1];
             stakeholders.pop();
         }
     }
 
-    function rewardOf(address _stakeholder)
+    function rewardOf(address _address)
         public
         view
         returns (uint256)
     {
-        return rewards[_stakeholder];
+        return rewards[_address];
     }
 
     function totalRewards()
@@ -111,12 +110,12 @@ contract Staking is ERC20, Ownable {
         return _totalRewards;
     }
 
-    function calculateReward(address _stakeholder)
+    function calculateReward(address _address)
         public
         view
         returns (uint256)
     {
-        return stakes[_stakeholder] / 100;
+        return stakes[_address] / 100;
     }
 
     function withdrawReward()
