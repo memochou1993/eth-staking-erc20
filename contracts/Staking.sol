@@ -28,7 +28,7 @@ contract Staking is ERC20, Ownable {
     function createStake(uint256 _amount)
         public
     {
-        require(stakes[msg.sender].amount == 0);
+        require(stakes[msg.sender].amount == 0, "Stake exists.");
         _burn(msg.sender, _amount);
         addStakeholder(msg.sender);
         stakes[msg.sender] = Stake(_amount, rewardRate, 0, block.timestamp);
@@ -37,7 +37,7 @@ contract Staking is ERC20, Ownable {
     function removeStake()
         public
     {
-        require(stakes[msg.sender].amount != 0);
+        require(stakes[msg.sender].amount != 0, "Stake does not exists.");
         uint256 _amount = stakes[msg.sender].amount;
         delete stakes[msg.sender];
         removeStakeholder(msg.sender);
@@ -77,25 +77,6 @@ contract Staking is ERC20, Ownable {
         return (false, 0);
     }
 
-    function addStakeholder(address _stakeholder)
-        private
-    {
-        (bool _isStakeholder, ) = isStakeholder(_stakeholder);
-        if (!_isStakeholder) {
-            stakeholders.push(_stakeholder);
-        }
-    }
-
-    function removeStakeholder(address _stakeholder)
-        private
-    {
-        (bool _isStakeholder, uint256 i) = isStakeholder(_stakeholder);
-        if (_isStakeholder) {
-            stakeholders[i] = stakeholders[stakeholders.length - 1];
-            stakeholders.pop();
-        }
-    }
-
     function calculateReward(address _stakeholder)
         public
         view
@@ -122,5 +103,24 @@ contract Staking is ERC20, Ownable {
         onlyOwner
     {
         rewardRate = _rewardRate;
+    }
+
+    function addStakeholder(address _stakeholder)
+        private
+    {
+        (bool _isStakeholder, ) = isStakeholder(_stakeholder);
+        if (!_isStakeholder) {
+            stakeholders.push(_stakeholder);
+        }
+    }
+
+    function removeStakeholder(address _stakeholder)
+        private
+    {
+        (bool _isStakeholder, uint256 i) = isStakeholder(_stakeholder);
+        if (_isStakeholder) {
+            stakeholders[i] = stakeholders[stakeholders.length - 1];
+            stakeholders.pop();
+        }
     }
 }

@@ -4,6 +4,8 @@
     "security"
   ],
   "rules": {
-    "blank-lines": "off"
+    "blank-lines": "off",
+    "arg-overflow": "off",
+    "security/no-block-members": "off"
   }
 }
