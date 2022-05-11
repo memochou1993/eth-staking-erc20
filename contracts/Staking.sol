@@ -26,17 +26,16 @@ contract Staking is ERC20, Ownable {
     function createStake(uint256 _amount)
         public
     {
+        require(stakes[msg.sender].amount == 0);
         _burn(msg.sender, _amount);
-        if (stakes[msg.sender].amount == 0) {
-            addStakeholder(msg.sender);
-        }
-        stakes[msg.sender].amount += _amount;
-        stakes[msg.sender].createdAt = block.timestamp;
+        addStakeholder(msg.sender);
+        stakes[msg.sender] = Stake(_amount, 0, block.timestamp);
     }
 
     function removeStake()
         public
     {
+        require(stakes[msg.sender].amount != 0);
         uint256 _amount = stakes[msg.sender].amount;
         delete stakes[msg.sender];
         removeStakeholder(msg.sender);
