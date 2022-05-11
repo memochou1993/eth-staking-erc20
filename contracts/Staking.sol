@@ -18,8 +18,8 @@ contract Staking is ERC20, Ownable {
         uint256 createdAt;
     }
 
-    address[] internal stakeholders;
-    mapping(address => Stake) internal stakes;
+    address[] private stakeholders;
+    mapping(address => Stake) private stakes;
 
     constructor() ERC20("My Token", "MTK") {
         _mint(msg.sender, INITIAL_SUPPLY);
