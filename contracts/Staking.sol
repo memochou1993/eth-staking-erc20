@@ -76,7 +76,7 @@ contract Staking is ERC20, Ownable {
     }
 
     function addStakeholder(address _stakeholder)
-        public
+        private
     {
         (bool _isStakeholder, ) = isStakeholder(_stakeholder);
         if (!_isStakeholder) {
@@ -85,7 +85,7 @@ contract Staking is ERC20, Ownable {
     }
 
     function removeStakeholder(address _stakeholder)
-        public
+        private
     {
         (bool _isStakeholder, uint256 i) = isStakeholder(_stakeholder);
         if (_isStakeholder) {
@@ -107,9 +107,9 @@ contract Staking is ERC20, Ownable {
         onlyOwner
     {
         for (uint256 i = 0; i < stakeholders.length; i += 1) {
-            uint256 reward = calculateReward(stakeholders[i]);
-            stakes[stakeholders[i]].distributedReward += reward;
-            _mint(msg.sender, reward);
+            uint256 _reward = calculateReward(stakeholders[i]);
+            stakes[stakeholders[i]].distributedReward += _reward;
+            _mint(msg.sender, _reward);
         }
     }
 }
