@@ -13,8 +13,8 @@ contract Staking is ERC20, Ownable {
 
     struct Stake {
         uint256 amount;
+        uint256 earned;
         uint256 rewardRate;
-        uint256 distributedReward;
         uint256 createdAt;
     }
 
@@ -31,7 +31,12 @@ contract Staking is ERC20, Ownable {
         require(stakes[msg.sender].amount == 0, "Stake exists.");
         _burn(msg.sender, _amount);
         addStakeholder(msg.sender);
-        stakes[msg.sender] = Stake(_amount, rewardRate, 0, block.timestamp);
+        stakes[msg.sender] = Stake({
+            amount: _amount,
+            earned: 0,
+            rewardRate: rewardRate,
+            createdAt: block.timestamp
+        });
     }
 
     function removeStake()
@@ -84,7 +89,7 @@ contract Staking is ERC20, Ownable {
     {
         Stake memory _stake = stakes[_stakeholder];
         uint256 _rewardPerSecond = _stake.amount * _stake.rewardRate / 100 / 365 / 86400;
-        return (block.timestamp - _stake.createdAt) * _rewardPerSecond - _stake.distributedReward;
+        return (block.timestamp - _stake.createdAt) * _rewardPerSecond - _stake.earned;
     }
 
     function distributeRewards()
@@ -93,7 +98,7 @@ contract Staking is ERC20, Ownable {
     {
         for (uint256 i = 0; i < stakeholders.length; i += 1) {
             uint256 _reward = calculateReward(stakeholders[i]);
-            stakes[stakeholders[i]].distributedReward += _reward;
+            stakes[stakeholders[i]].earned += _reward;
             _mint(msg.sender, _reward);
         }
     }
