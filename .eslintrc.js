@@ -8,9 +8,10 @@ module.exports = {
     ecmaVersion: '2020',
   },
   rules: {
+    'max-len': 'off',
     'no-console': 'off',
     'no-undef': 'off',
-    'prefer-destructuring': 'off',
     'no-unused-vars': 'off',
+    'prefer-destructuring': 'off',
   },
 };

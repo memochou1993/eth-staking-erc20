@@ -28,14 +28,24 @@ class App {
   }
 
   async render() {
+    this.stake = (await this.contract.stakeOf(this.account));
     document.getElementById('account').textContent = this.account;
-    document.getElementById('isStakeholder').textContent = (await this.contract.isStakeholder(this.account))[0];
-    document.getElementById('stakeOf').textContent = (await this.contract.stakeOf(this.account)).toNumber();
-    document.getElementById('rewardOf').textContent = (await this.contract.rewardOf(this.account)).toNumber();
     document.getElementById('balanceOf').textContent = (await this.contract.balanceOf(this.account)).toNumber();
-    document.getElementById('totalStakes').textContent = await this.contract.totalStakes();
-    document.getElementById('totalRewards').textContent = await this.contract.totalRewards();
+    document.getElementById('amount').textContent = this.stake.amount;
+    document.getElementById('earned').textContent = this.stake.earned;
+    document.getElementById('rewardRate').textContent = this.stake.rewardRate;
+    document.getElementById('createdAt').textContent = this.stake.createdAt;
+    document.getElementById('isStakeholder').textContent = (await this.contract.isStakeholder(this.account))[0];
+    document.getElementById('totalStakeAmount').textContent = await this.contract.totalStakeAmount();
     document.getElementById('totalSupply').textContent = await this.contract.totalSupply();
+    setInterval(() => {
+      if (Number(this.stake.createdAt) === 0) {
+        return;
+      }
+      const rewardPerSecond = Math.floor((this.stake.amount * this.stake.rewardRate) / 100 / 365 / 86400);
+      const estimatedReward = (Math.floor(+new Date() / 1000) - this.stake.createdAt) * rewardPerSecond - this.stake.earned;
+      document.getElementById('estimatedReward').textContent = estimatedReward;
+    }, 1000);
   }
 
   async createStake() {
@@ -45,13 +55,7 @@ class App {
   }
 
   async removeStake() {
-    const amount = document.getElementById('stakeAmount').value;
-    await this.contract.removeStake(amount, this.payload());
-    window.location.reload();
-  }
-
-  async withdrawReward() {
-    await this.contract.withdrawReward(this.payload());
+    await this.contract.removeStake(this.payload());
     window.location.reload();
   }
 
