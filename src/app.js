@@ -4,7 +4,7 @@ class App {
       console.log('Please connect to Metamask.');
       return;
     }
-    window.ethereum.enable();
+    window.ethereum.request({ method: 'eth_requestAccounts' });
     window.ethereum.on('accountsChanged', () => this.init());
     this.web3 = new Web3(window.ethereum);
     this.init();
@@ -13,7 +13,9 @@ class App {
   async init() {
     await this.loadAccount();
     await this.loadContract();
-    await this.render();
+    if (this.account) {
+      await this.render();
+    }
   }
 
   async loadAccount() {
