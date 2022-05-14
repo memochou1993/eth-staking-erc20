@@ -13,6 +13,7 @@ class App {
   async init() {
     await this.loadAccount();
     await this.loadContract();
+    await this.loadDecimals();
     if (this.account) {
       await this.render();
     }
@@ -29,29 +30,37 @@ class App {
     this.contract = await contract.deployed();
   }
 
+  async loadDecimals() {
+    this.decimals = (await this.contract.decimals()).toNumber();
+  }
+
   async render() {
     this.stake = (await this.contract.stakeOf(this.account));
     document.getElementById('account').textContent = this.account;
-    document.getElementById('balanceOf').textContent = (await this.contract.balanceOf(this.account)).toNumber();
-    document.getElementById('amount').textContent = this.stake.amount;
-    document.getElementById('earned').textContent = this.stake.earned;
-    document.getElementById('rewardRate').textContent = this.stake.rewardRate;
-    document.getElementById('createdAt').textContent = this.stake.createdAt;
+    document.getElementById('balanceOf').textContent = this.formatNumber((await this.contract.balanceOf(this.account)).toNumber());
+    document.getElementById('stake_amount').textContent = this.formatNumber(this.stake.amount);
+    document.getElementById('stake_earned').textContent = this.formatNumber(this.stake.earned);
+    document.getElementById('stake_rewardRate').textContent = `${this.stake.rewardRate}%`;
+    document.getElementById('stake_createdAt').textContent = this.stake.createdAt;
     document.getElementById('isStakeholder').textContent = (await this.contract.isStakeholder(this.account))[0];
-    document.getElementById('totalStakeAmount').textContent = await this.contract.totalStakeAmount();
-    document.getElementById('totalSupply').textContent = await this.contract.totalSupply();
+    document.getElementById('totalStakeAmount').textContent = this.formatNumber((await this.contract.totalStakeAmount()).toNumber());
+    document.getElementById('totalSupply').textContent = this.formatNumber((await this.contract.totalSupply()).toNumber());
     setInterval(() => {
       if (Number(this.stake.createdAt) === 0) {
         return;
       }
       const rewardPerSecond = Math.floor((this.stake.amount * this.stake.rewardRate) / 100 / 365 / 86400);
       const estimatedReward = (Math.floor(+new Date() / 1000) - this.stake.createdAt) * rewardPerSecond - this.stake.earned;
-      document.getElementById('estimatedReward').textContent = estimatedReward;
+      document.getElementById('estimatedReward').textContent = this.formatNumber(estimatedReward);
     }, 1000);
   }
 
+  formatNumber(number) {
+    return (number / (10 ** this.decimals)).toFixed(this.decimals);
+  }
+
   async createStake() {
-    const amount = document.getElementById('stakeAmount').value;
+    const amount = Number(document.getElementById('stakeAmount').value) * (10 ** this.decimals);
     await this.contract.createStake(amount, this.payload());
     window.location.reload();
   }
@@ -68,7 +77,7 @@ class App {
 
   async transfer() {
     const to = document.getElementById('to').value;
-    const amount = document.getElementById('transferAmount').value;
+    const amount = Number(document.getElementById('transferAmount').value) * (10 ** this.decimals);
     await this.contract.transfer(to, amount, this.payload());
     window.location.reload();
   }

@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract Staking is ERC20, Ownable {
     using SafeMath for uint256;
 
-    uint256 public constant INITIAL_SUPPLY = 100000000;
+    uint256 public constant INITIAL_SUPPLY = 1e10;
     uint256 public rewardRate = 100;
 
     struct Stake {
@@ -19,10 +19,23 @@ contract Staking is ERC20, Ownable {
     }
 
     address[] private stakeholders;
+    // The stakes of stakeholders
     mapping(address => Stake) private stakes;
+    // The reward rates of stake days
+    mapping(uint256 => uint256) public rewardRates;
 
     constructor() ERC20("My Token", "MTK") {
         _mint(msg.sender, INITIAL_SUPPLY);
+    }
+
+    function decimals()
+        public
+        view
+        virtual
+        override
+        returns (uint8)
+    {
+        return 2;
     }
 
     function createStake(uint256 _amount)
@@ -42,7 +55,7 @@ contract Staking is ERC20, Ownable {
     function removeStake()
         public
     {
-        require(stakes[msg.sender].amount != 0, "Stake does not exists.");
+        require(stakes[msg.sender].amount != 0, "Stake does not exist.");
         uint256 _amount = stakes[msg.sender].amount;
         delete stakes[msg.sender];
         removeStakeholder(msg.sender);
