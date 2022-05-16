@@ -20,7 +20,7 @@ contract Staking is ERC20, Ownable {
 
     struct Stakeholder {
         address addr;
-        Stake stake;
+        Stake[] stakes;
     }
 
     Stakeholder[] public stakeholders;
@@ -45,17 +45,17 @@ contract Staking is ERC20, Ownable {
         public
     {
         require(_amount > 0, "Cannot stake nothing");
-        uint256 index = stakeholderIndexes[msg.sender];
+        uint256 stakeholderIndex = stakeholderIndexes[msg.sender];
         uint256 timestamp = block.timestamp;
-        if (index == 0) {
-            index = addStakeholder(msg.sender);
+        if (!isStakeholder(msg.sender)) {
+            stakeholderIndex = addStakeholder(msg.sender);
         }
-        stakeholders[index].stake = Stake({
+        stakeholders[stakeholderIndex].stakes.push(Stake({
             amount: _amount,
             rewardRate: rewardRate,
             claimable: 0,
             startedAt: timestamp
-        });
+        }));
         // emit Staked
     }
 
@@ -78,11 +78,11 @@ contract Staking is ERC20, Ownable {
         return stakeholderIndexes[_stakeholder] != 0;
     }
 
-    function stakeAmountOf(address _stakeholder)
+    function stakes()
         public
         view
-        returns (uint256)
+        returns (Stake[] memory)
     {
-        return stakeholders[stakeholderIndexes[_stakeholder]].stake.amount;
+        return stakeholders[stakeholderIndexes[msg.sender]].stakes;
     }
 }
