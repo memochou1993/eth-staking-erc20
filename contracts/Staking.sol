@@ -19,8 +19,7 @@ contract Staking is ERC20, Ownable {
     struct Stake {
         uint256 amount;
         uint256 rewardRate;
-        uint256 claimable;
-        uint256 startedAt;
+        uint256 createdAt;
     }
 
     Stakeholder[] public stakeholders;
@@ -33,6 +32,13 @@ contract Staking is ERC20, Ownable {
 
     modifier onlyStakeholder() {
         require(isStakeholder(msg.sender), "Staking: caller is not the stakeholder");
+        _;
+    }
+
+    modifier validStakeIndex(uint256 _stakeIndex) {
+        uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
+        Stake[] memory _stakes = stakeholders[_stakeholderIndex].stakes;
+        require(_stakeIndex < _stakes.length && _stakes[_stakeIndex].amount > 0, "Staking: stake does not exist");
         _;
     }
 
@@ -49,35 +55,31 @@ contract Staking is ERC20, Ownable {
     function createStake(uint256 _amount)
         public
     {
-        require(_amount > 0, "Staking: cannot stake nothing");
+        require(_amount > 0, "Staking: amount cannot be zero");
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
-        uint256 _timestamp = block.timestamp;
         if (!isStakeholder(msg.sender)) {
             _stakeholderIndex = addStakeholder(msg.sender);
         }
         stakeholders[_stakeholderIndex].stakes.push(Stake({
             amount: _amount,
             rewardRate: rewardRate,
-            claimable: 0,
-            startedAt: _timestamp
+            createdAt: block.timestamp
         }));
         _burn(msg.sender, _amount);
-        // emit StakeCreated
+        // TODO: emit StakeCreated
     }
 
     function removeStake(uint256 _stakeIndex)
         public
         onlyStakeholder
+        validStakeIndex(_stakeIndex)
     {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
-        Stake[] memory _stakes = stakeholders[_stakeholderIndex].stakes;
-        require(_stakeIndex < _stakes.length, "Staking: invalid stake ID");
-        Stake memory _stake = _stakes[_stakeIndex];
-        require(_stake.amount > 0, "Staking: stake does not exist");
-        uint256 _reward = calculateReward(_stake);
+        Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
+        uint256 _reward = calculateReward(_stakeIndex);
         delete stakeholders[_stakeholderIndex].stakes[_stakeIndex];
         _mint(msg.sender, _stake.amount + _reward);
-        // emit StakeRemoved
+        // TODO: emit StakeRemoved
     }
 
     function isStakeholder(address _stakeholder)
@@ -109,12 +111,16 @@ contract Staking is ERC20, Ownable {
         return index;
     }
 
-    function calculateReward(Stake memory _stake)
-        internal
+    function calculateReward(uint256 _stakeIndex)
+        public
         view
+        onlyStakeholder
+        validStakeIndex(_stakeIndex)
         returns (uint256)
     {
+        uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
+        Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
         uint256 _rewardPerSecond = _stake.amount * _stake.rewardRate / 100 / 365 / 86400;
-        return (block.timestamp - _stake.startedAt) * _rewardPerSecond;
+        return (block.timestamp - _stake.createdAt) * _rewardPerSecond;
     }
 }
