@@ -8,7 +8,7 @@
     <style>div { margin: 8px 0; } hr { margin: 16px 0; }</style>
 </head>
 <body>
-    <script src="vendor/web3/dist/web3.min.js"></script>
+    <script src="vendor/@metamask/detect-provider/dist/detect-provider.min.js"></script>
     <script src="vendor/@truffle/contract/dist/truffle-contract.js"></script>
     <script src="app.js"></script>
     <h1>Staking</h1>
@@ -19,27 +19,13 @@
         <input type="number" id="stakeAmount" min="0" placeholder="Amount">
     </div>
     <div>
-        <button onclick="app.removeStake()">Remove Stake</button>
-    </div>
-    <div>
         <button onclick="app.transfer()">Transfer</button>
         <input type="number" id="transferAmount" min="0" placeholder="Amount">
         <input type="text" id="to" min="0" placeholder="To">
     </div>
     <div>account: <span id="account"></span></div>
     <div>balanceOf: <span id="balanceOf"></span></div>
-    <div>stake.amount: <span id="stake_amount"></span></div>
-    <div>stake.earned: <span id="stake_earned"></span></div>
-    <div>stake.rewardRate: <span id="stake_rewardRate"></span></div>
-    <div>stake.createdAt: <span id="stake_createdAt"></span></div>
     <div>isStakeholder: <span id="isStakeholder"></span></div>
     <div>estimatedReward: <span id="estimatedReward"></span></div>
-    <hr>
-    <div><b>Contract Owner</b></div>
-    <div>
-        <button onclick="app.distributeRewards()">Distribute Rewards</button>
-    </div>
-    <div>totalStakeAmount: <span id="totalStakeAmount"></span></div>
-    <div>totalSupply: <span id="totalSupply"></span></div>
 </body>
 </html>
