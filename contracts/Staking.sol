@@ -100,17 +100,6 @@ contract Staking is ERC20, Ownable {
         return stakeholders[_stakeholderIndex].stakes;
     }
 
-    function addStakeholder(address _stakeholder)
-        internal
-        returns (uint256)
-    {
-        stakeholders.push();
-        uint256 index = stakeholders.length - 1;
-        stakeholders[index].addr = _stakeholder;
-        stakeholderIndexes[_stakeholder] = index;
-        return index;
-    }
-
     function calculateReward(uint256 _stakeIndex)
         public
         view
@@ -122,5 +111,16 @@ contract Staking is ERC20, Ownable {
         Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
         uint256 _rewardPerSecond = _stake.amount * _stake.rewardRate / 100 / 365 / 86400;
         return (block.timestamp - _stake.createdAt) * _rewardPerSecond;
+    }
+
+    function addStakeholder(address _stakeholder)
+        internal
+        returns (uint256)
+    {
+        stakeholders.push();
+        uint256 index = stakeholders.length - 1;
+        stakeholders[index].addr = _stakeholder;
+        stakeholderIndexes[_stakeholder] = index;
+        return index;
     }
 }
