@@ -17,6 +17,7 @@ contract Staking is ERC20, Ownable {
     }
 
     struct Stake {
+        uint256 index;
         uint256 amount;
         uint256 rewardRate;
         uint256 createdAt;
@@ -52,15 +53,16 @@ contract Staking is ERC20, Ownable {
         return 2;
     }
 
-    function createStake(uint256 _amount)
+    function deposit(uint256 _amount)
         public
     {
         require(_amount > 0, "Staking: amount cannot be zero");
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         if (!isStakeholder(msg.sender)) {
-            _stakeholderIndex = addStakeholder(msg.sender);
+            _stakeholderIndex = register(msg.sender);
         }
         stakeholders[_stakeholderIndex].stakes.push(Stake({
+            index: stakeholders[_stakeholderIndex].stakes.length,
             amount: _amount,
             rewardRate: rewardRate,
             createdAt: block.timestamp
@@ -69,16 +71,17 @@ contract Staking is ERC20, Ownable {
         // TODO: emit StakeCreated
     }
 
-    function removeStake(uint256 _stakeIndex)
+    function withdraw(uint256 _stakeIndex)
         public
         onlyStakeholder
         validStakeIndex(_stakeIndex)
     {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
-        uint256 _reward = calculateReward(_stakeIndex);
-        delete stakeholders[_stakeholderIndex].stakes[_stakeIndex];
-        _mint(msg.sender, _stake.amount + _reward);
+        uint256 _amount = _stake.amount;
+        uint256 _reward = calculateReward(_stake);
+        stakeholders[_stakeholderIndex].stakes[_stakeIndex].amount = 0;
+        _mint(msg.sender, _amount + _reward);
         // TODO: emit StakeRemoved
     }
 
@@ -100,20 +103,17 @@ contract Staking is ERC20, Ownable {
         return stakeholders[_stakeholderIndex].stakes;
     }
 
-    function calculateReward(uint256 _stakeIndex)
-        public
+    function calculateReward(Stake memory _stake)
+        internal
         view
         onlyStakeholder
-        validStakeIndex(_stakeIndex)
         returns (uint256)
     {
-        uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
-        Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
         uint256 _rewardPerSecond = _stake.amount * _stake.rewardRate / 100 / 365 / 86400;
         return (block.timestamp - _stake.createdAt) * _rewardPerSecond;
     }
 
-    function addStakeholder(address _stakeholder)
+    function register(address _stakeholder)
         internal
         returns (uint256)
     {
