@@ -5,27 +5,47 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <style>div { margin: 8px 0; } hr { margin: 16px 0; }</style>
+    <style>
+        div { margin: 8px 0; }
+        hr { margin: 16px 0; }
+        table, th, td { border: 1px solid; }
+        td { width: 160px;}
+    </style>
 </head>
-<body>
+<body hidden>
+    <div id="root">
+        <h1>Staking</h1>
+        <input v-model="amount" type="number" min="0">
+        <button @click="() => deposit()">Deposit</button>
+        <div>account: {{ account }}</div>
+        <div>balanceOf: {{ balanceOf }}</div>
+        <div>isStakeholder: {{ isStakeholder }}</div>
+        <table>
+            <tr>
+                <td>#</td>
+                <td>Amount</td>
+                <td>APR</td>
+                <td>Duration (days)</td>
+                <td>Created At</td>
+                <td>Earned Reward</td>
+                <td>Estimated Reward</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr v-for="(stake, i) in stakes" :key="stake.index">
+                <td>{{ i+1 }}</td>
+                <td>{{ formatNumber(stake.amount) }}</td>
+                <td>{{ `${stake.rewardRate}%` }}</td>
+                <td>7</td>
+                <td>{{ stake.createdAt }}</td>
+                <td>{{ formatNumber(earnedReward(stake)) }}</td>
+                <td>{{ formatNumber(estimatedReward(stake)) }}</td>
+                <td><button @click="() => withdraw(stake.index)">Withdraw</button></td>
+            </tr>
+        </table>
+    </div>
+    <script src="vendor/vue/dist/vue.js"></script>
     <script src="vendor/@metamask/detect-provider/dist/detect-provider.min.js"></script>
     <script src="vendor/@truffle/contract/dist/truffle-contract.js"></script>
     <script src="app.js"></script>
-    <h1>Staking</h1>
-    <hr>
-    <div><b>Stakeholder</b></div>
-    <div>
-        <button onclick="app.createStake()">Create Stake</button>
-        <input type="number" id="stakeAmount" min="0" placeholder="Amount">
-    </div>
-    <div>
-        <button onclick="app.transfer()">Transfer</button>
-        <input type="number" id="transferAmount" min="0" placeholder="Amount">
-        <input type="text" id="to" min="0" placeholder="To">
-    </div>
-    <div>account: <span id="account"></span></div>
-    <div>balanceOf: <span id="balanceOf"></span></div>
-    <div>isStakeholder: <span id="isStakeholder"></span></div>
-    <div>estimatedReward: <span id="estimatedReward"></span></div>
 </body>
 </html>

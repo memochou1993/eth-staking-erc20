@@ -10,8 +10,7 @@ module.exports = {
   rules: {
     'max-len': 'off',
     'no-console': 'off',
+    'no-new': 'off',
     'no-undef': 'off',
-    'no-unused-vars': 'off',
-    'prefer-destructuring': 'off',
   },
 };
