@@ -106,7 +106,6 @@ contract Staking is ERC20, Ownable {
     function calculateReward(Stake memory _stake)
         internal
         view
-        onlyStakeholder
         returns (uint256)
     {
         uint256 _rewardPerSecond = _stake.amount * _stake.rewardRate / 100 / 365 / 86400;
