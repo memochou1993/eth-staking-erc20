@@ -52,11 +52,11 @@ new Vue({
       window.location.reload();
     },
     estimatedReward(stake) {
-      const rewardPerSecond = Math.floor((stake.amount * stake.rewardRate) / 100 / 365 / 86400);
+      const rewardPerSecond = Math.floor((stake.locked * stake.rewardRate) / 100 / 365 / 86400);
       return (Math.floor(+new Date() / 1000) - stake.createdAt) * rewardPerSecond;
     },
     estimatedTotalReward(stake) {
-      return Math.floor((((stake.amount * stake.rewardRate) / 100) / 365) * 7);
+      return Math.floor((((stake.locked * stake.rewardRate) / 100) / 365) * 7);
     },
     formatNumber(number) {
       return (number / (10 ** this.decimals)).toFixed(this.decimals);

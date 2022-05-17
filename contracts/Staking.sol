@@ -19,9 +19,11 @@ contract Staking is ERC20, Ownable {
 
     struct Stake {
         uint256 index;
-        uint256 amount;
-        uint256 duration;
+        uint256 locked;
+        uint256 unlocked;
+        uint256 earned;
         uint256 rewardRate;
+        uint256 duration;
         uint256 createdAt;
     }
 
@@ -41,7 +43,7 @@ contract Staking is ERC20, Ownable {
     modifier validStakeIndex(uint256 _stakeIndex) {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         Stake[] memory _stakes = stakeholders[_stakeholderIndex].stakes;
-        require(_stakeIndex < _stakes.length && _stakes[_stakeIndex].amount > 0, "Staking: stake does not exist");
+        require(_stakeIndex < _stakes.length && _stakes[_stakeIndex].locked > 0, "Staking: stake does not exist");
         _;
     }
 
@@ -65,7 +67,9 @@ contract Staking is ERC20, Ownable {
         }
         stakeholders[_stakeholderIndex].stakes.push(Stake({
             index: stakeholders[_stakeholderIndex].stakes.length,
-            amount: _amount,
+            locked: _amount,
+            unlocked: 0,
+            earned: 0,
             duration: duration,
             rewardRate: rewardRate,
             createdAt: block.timestamp
@@ -81,13 +85,12 @@ contract Staking is ERC20, Ownable {
     {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
-        uint256 _amount = _stake.amount;
-        uint256 _reward = 0;
-        if (block.timestamp - _stake.createdAt > _stake.duration) {
-            _reward = calculateReward(_stake);
-        }
-        stakeholders[_stakeholderIndex].stakes[_stakeIndex].amount = 0;
-        _mint(msg.sender, _amount + _reward);
+        uint256 _locked = _stake.locked;
+        uint256 _reward = calculateReward(_stake);
+        stakeholders[_stakeholderIndex].stakes[_stakeIndex].locked = 0;
+        stakeholders[_stakeholderIndex].stakes[_stakeIndex].unlocked = _locked;
+        stakeholders[_stakeholderIndex].stakes[_stakeIndex].earned = _reward;
+        _mint(msg.sender, _locked + _reward);
         // TODO: emit StakeRemoved
     }
 
@@ -114,7 +117,7 @@ contract Staking is ERC20, Ownable {
         view
         returns (uint256)
     {
-        uint256 _rewardPerSecond = _stake.amount * _stake.rewardRate / 100 / 365 days;
+        uint256 _rewardPerSecond = _stake.locked * _stake.rewardRate / 100 / 365 days;
         return (block.timestamp - _stake.createdAt) * _rewardPerSecond;
     }
 

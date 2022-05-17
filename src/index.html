@@ -23,7 +23,9 @@
         <table>
             <tr>
                 <td>#</td>
-                <td>Amount</td>
+                <td>Locked</td>
+                <td>Unlocked</td>
+                <td>Earned</td>
                 <td>APR</td>
                 <td>Duration (days)</td>
                 <td>Created At</td>
@@ -33,7 +35,9 @@
             </tr>
             <tr v-for="(stake, i) in stakes" :key="stake.index">
                 <td>{{ i+1 }}</td>
-                <td>{{ formatNumber(stake.amount) }}</td>
+                <td>{{ formatNumber(stake.locked) }}</td>
+                <td>{{ formatNumber(stake.unlocked) }}</td>
+                <td>{{ formatNumber(stake.earned) }}</td>
                 <td>{{ `${stake.rewardRate}%` }}</td>
                 <td>7</td>
                 <td>{{ stake.createdAt }}</td>
