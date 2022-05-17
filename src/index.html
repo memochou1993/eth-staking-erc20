@@ -43,7 +43,7 @@
                 <td>{{ stake.createdAt }}</td>
                 <td>{{ formatNumber(estimatedReward(stake)) }}</td>
                 <td>{{ formatNumber(estimatedTotalReward(stake)) }}</td>
-                <td><button @click="() => withdraw(stake.index)">Withdraw</button></td>
+                <td><button :disabled="Number(stake.locked) < 1" @click="() => withdraw(stake.index)">Withdraw</button></td>
             </tr>
         </table>
     </div>

@@ -9,7 +9,7 @@ contract Staking is ERC20, Ownable {
     using SafeMath for uint256;
 
     uint256 public constant INITIAL_SUPPLY = 1e10;
-    uint256 public duration = 30 seconds;
+    uint256 public duration = 30 seconds; // 7 days
     uint256 public rewardRate = 100;
 
     struct Stakeholder {
@@ -22,8 +22,8 @@ contract Staking is ERC20, Ownable {
         uint256 locked;
         uint256 unlocked;
         uint256 earned;
-        uint256 rewardRate;
         uint256 duration;
+        uint256 rewardRate;
         uint256 createdAt;
     }
 
@@ -85,6 +85,7 @@ contract Staking is ERC20, Ownable {
     {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
+        require(block.timestamp - _stake.createdAt > _stake.duration, "Staking: stake is still locked");
         uint256 _locked = _stake.locked;
         uint256 _reward = calculateReward(_stake);
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].locked = 0;
