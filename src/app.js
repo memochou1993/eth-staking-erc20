@@ -40,7 +40,7 @@ new Vue({
       if (!this.isStakeholder) {
         return;
       }
-      this.stakes = (await this.contract.stakes(this.payload())).filter((s) => Number(s.amount) > 0);
+      this.stakes = (await this.contract.stakes(this.payload()));
     },
     async deposit() {
       const amount = Number(this.amount) * (10 ** this.decimals);
@@ -51,11 +51,11 @@ new Vue({
       await this.contract.withdraw(index, this.payload());
       window.location.reload();
     },
-    earnedReward(stake) {
+    estimatedReward(stake) {
       const rewardPerSecond = Math.floor((stake.amount * stake.rewardRate) / 100 / 365 / 86400);
       return (Math.floor(+new Date() / 1000) - stake.createdAt) * rewardPerSecond;
     },
-    estimatedReward(stake) {
+    estimatedTotalReward(stake) {
       return Math.floor((((stake.amount * stake.rewardRate) / 100) / 365) * 7);
     },
     formatNumber(number) {

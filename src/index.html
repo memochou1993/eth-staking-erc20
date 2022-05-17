@@ -27,8 +27,8 @@
                 <td>APR</td>
                 <td>Duration (days)</td>
                 <td>Created At</td>
-                <td>Earned Reward</td>
                 <td>Estimated Reward</td>
+                <td>Estimated Total Reward</td>
                 <td>&nbsp;</td>
             </tr>
             <tr v-for="(stake, i) in stakes" :key="stake.index">
@@ -37,8 +37,8 @@
                 <td>{{ `${stake.rewardRate}%` }}</td>
                 <td>7</td>
                 <td>{{ stake.createdAt }}</td>
-                <td>{{ formatNumber(earnedReward(stake)) }}</td>
                 <td>{{ formatNumber(estimatedReward(stake)) }}</td>
+                <td>{{ formatNumber(estimatedTotalReward(stake)) }}</td>
                 <td><button @click="() => withdraw(stake.index)">Withdraw</button></td>
             </tr>
         </table>
