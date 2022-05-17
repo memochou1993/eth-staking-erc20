@@ -9,6 +9,7 @@ contract Staking is ERC20, Ownable {
     using SafeMath for uint256;
 
     uint256 public constant INITIAL_SUPPLY = 1e10;
+    uint256 public duration = 30 seconds;
     uint256 public rewardRate = 100;
 
     struct Stakeholder {
@@ -19,6 +20,7 @@ contract Staking is ERC20, Ownable {
     struct Stake {
         uint256 index;
         uint256 amount;
+        uint256 duration;
         uint256 rewardRate;
         uint256 createdAt;
     }
@@ -64,6 +66,7 @@ contract Staking is ERC20, Ownable {
         stakeholders[_stakeholderIndex].stakes.push(Stake({
             index: stakeholders[_stakeholderIndex].stakes.length,
             amount: _amount,
+            duration: duration,
             rewardRate: rewardRate,
             createdAt: block.timestamp
         }));
@@ -79,7 +82,10 @@ contract Staking is ERC20, Ownable {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
         uint256 _amount = _stake.amount;
-        uint256 _reward = calculateReward(_stake);
+        uint256 _reward = 0;
+        if (block.timestamp - _stake.createdAt > _stake.duration) {
+            _reward = calculateReward(_stake);
+        }
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].amount = 0;
         _mint(msg.sender, _amount + _reward);
         // TODO: emit StakeRemoved
@@ -108,7 +114,7 @@ contract Staking is ERC20, Ownable {
         view
         returns (uint256)
     {
-        uint256 _rewardPerSecond = _stake.amount * _stake.rewardRate / 100 / 365 / 86400;
+        uint256 _rewardPerSecond = _stake.amount * _stake.rewardRate / 100 / 365 days;
         return (block.timestamp - _stake.createdAt) * _rewardPerSecond;
     }
 
