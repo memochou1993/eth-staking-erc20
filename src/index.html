@@ -25,9 +25,9 @@
                 <td>#</td>
                 <td>Locked</td>
                 <td>Unlocked</td>
-                <td>Earned</td>
-                <td>APR</td>
                 <td>Duration (days)</td>
+                <td>APR</td>
+                <td>Claimed Reward</td>
                 <td>Created At</td>
                 <td>Estimated Reward</td>
                 <td>Estimated Total Reward</td>
@@ -37,9 +37,9 @@
                 <td>{{ i+1 }}</td>
                 <td>{{ formatNumber(stake.locked) }}</td>
                 <td>{{ formatNumber(stake.unlocked) }}</td>
-                <td>{{ formatNumber(stake.earned) }}</td>
-                <td>{{ `${stake.rewardRate}%` }}</td>
                 <td>7</td>
+                <td>{{ `${stake.rewardRate}%` }}</td>
+                <td>{{ formatNumber(stake.rewardClaimed) }}</td>
                 <td>{{ stake.createdAt }}</td>
                 <td>{{ formatNumber(estimatedReward(stake)) }}</td>
                 <td>{{ formatNumber(estimatedTotalReward(stake)) }}</td>

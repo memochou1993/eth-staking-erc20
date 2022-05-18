@@ -21,9 +21,9 @@ contract Staking is ERC20, Ownable {
         uint256 index;
         uint256 locked;
         uint256 unlocked;
-        uint256 earned;
         uint256 duration;
         uint256 rewardRate;
+        uint256 rewardClaimed;
         uint256 createdAt;
     }
 
@@ -69,9 +69,9 @@ contract Staking is ERC20, Ownable {
             index: stakeholders[_stakeholderIndex].stakes.length,
             locked: _amount,
             unlocked: 0,
-            earned: 0,
             duration: duration,
             rewardRate: rewardRate,
+            rewardClaimed: 0,
             createdAt: block.timestamp
         }));
         _burn(msg.sender, _amount);
@@ -90,7 +90,7 @@ contract Staking is ERC20, Ownable {
         uint256 _reward = calculateReward(_stake);
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].locked = 0;
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].unlocked = _locked;
-        stakeholders[_stakeholderIndex].stakes[_stakeIndex].earned = _reward;
+        stakeholders[_stakeholderIndex].stakes[_stakeIndex].rewardClaimed = _reward;
         _mint(msg.sender, _locked + _reward);
         // TODO: emit StakeRemoved
     }
@@ -120,6 +120,14 @@ contract Staking is ERC20, Ownable {
     {
         uint256 _rewardPerSecond = _stake.locked * _stake.rewardRate / 100 / 365 days;
         return (block.timestamp - _stake.createdAt) * _rewardPerSecond;
+    }
+
+    function stakeholderCount()
+        public
+        view
+        returns (uint256)
+    {
+        return stakeholders.length;
     }
 
     function register(address _stakeholder)
