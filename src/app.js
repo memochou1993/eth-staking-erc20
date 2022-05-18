@@ -1,14 +1,21 @@
 new Vue({
   el: '#root',
   data: {
+    /**
+     * form data
+     */
     amount: '',
+    rewardPlanIndex: '',
+    rewardPlanDuration: '',
+    rewardPlanRewardRage: '',
+    /**
+     * display data
+     */
+    rewardPlans: [],
+    stakes: [],
     account: '',
     balanceOf: '',
     isStakeholder: false,
-    rewardPlans: [],
-    rewardPlanDuration: '',
-    rewardPlanRewardRage: '',
-    stakes: [],
   },
   created() {
     if (!window.ethereum) {
@@ -47,7 +54,7 @@ new Vue({
     },
     async deposit() {
       const amount = Number(this.amount) * (10 ** this.decimals);
-      await this.contract.deposit(amount, this.payload());
+      await this.contract.deposit(amount, this.rewardPlanIndex, this.payload());
       window.location.reload();
     },
     async withdraw(index) {
@@ -61,9 +68,6 @@ new Vue({
     async removeRewardPlan(index) {
       await this.contract.removeRewardPlan(index, this.payload());
       window.location.reload();
-    },
-    isRemovedRewardPlan(rewardPlan) {
-      return Number(rewardPlan.duration) === 0 && Number(rewardPlan.rewardRate) === 0;
     },
     estimatedReward(stake) {
       const rewardPerSecond = Math.floor((stake.locked * stake.rewardRate) / 100 / 365 / 86400);

@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        div { margin: 8px 0; }
-        hr { margin: 16px 0; }
+        div { margin: 12px 0; }
+        hr { margin: 12px 0; }
         table, th, td { border: 1px solid; }
-        td { width: 160px;}
+        td { min-width: 60px;}
     </style>
 </head>
 <body hidden>
@@ -17,6 +17,11 @@
         <h1>Staking</h1>
         <div>
             <input v-model="amount" type="number" min="0" placeholder="amount">
+            <select v-model="rewardPlanIndex">
+                <option v-for="(rewardPlan, i) in rewardPlans" :value="rewardPlan.index" v-show="Number(rewardPlan.deletedAt) === 0">
+                    {{ `${rewardPlan.duration} seconds (APR ${rewardPlan.rewardRate}%)` }}
+                </option>
+            </select>
             <button @click="() => deposit()">Deposit</button>
         </div>
         <div>account: {{ account }}</div>
@@ -27,8 +32,8 @@
                 <td>#</td>
                 <td>Locked</td>
                 <td>Unlocked</td>
-                <td>Duration (days)</td>
-                <td>Reward Rate</td>
+                <td>Duration (seconds)</td>
+                <td>Reward Rate (APR)</td>
                 <td>Claimed Reward</td>
                 <td>Created At</td>
                 <td>Estimated Reward</td>
@@ -39,7 +44,7 @@
                 <td>{{ i+1 }}</td>
                 <td>{{ formatNumber(stake.locked) }}</td>
                 <td>{{ formatNumber(stake.unlocked) }}</td>
-                <td>7</td>
+                <td>{{ stake.duration }}</td>
                 <td>{{ `${stake.rewardRate}%` }}</td>
                 <td>{{ formatNumber(stake.rewardClaimed) }}</td>
                 <td>{{ stake.createdAt }}</td>
@@ -50,22 +55,22 @@
         </table>
         <hr>
         <div>
-            <input v-model="rewardPlanDuration" type="number" min="0" placeholder="Duration (days)">
+            <input v-model="rewardPlanDuration" type="number" min="0" placeholder="Duration (seconds)">
             <input v-model="rewardPlanRewardRage" type="number" min="0" placeholder="Reward Rage">
             <button @click="() => createRewardPlan()">Create</button>
         </div>
         <table>
             <tr>
                 <td>#</td>
-                <td>Duration (days)</td>
-                <td>Reward Rate</td>
+                <td>Duration (seconds)</td>
+                <td>Reward Rate (APR)</td>
                 <td>&nbsp;</td>
             </tr>
             <tr v-for="(rewardPlan, i) in rewardPlans" :key="rewardPlan.index">
                 <td>{{ i+1 }}</td>
                 <td>{{ rewardPlan.duration }}</td>
                 <td>{{ `${rewardPlan.rewardRate}%` }}</td>
-                <td><button :disabled="isRemovedRewardPlan(rewardPlan)" @click="() => removeRewardPlan(rewardPlan.index)">Remove</button></td>
+                <td><button :disabled="Number(rewardPlan.deletedAt) !== 0" @click="() => removeRewardPlan(rewardPlan.index)">Remove</button></td>
             </tr>
         </table>
     </div>
