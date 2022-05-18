@@ -9,8 +9,6 @@ contract Staking is ERC20, Ownable {
     using SafeMath for uint256;
 
     uint256 public constant INITIAL_SUPPLY = 1e10;
-    uint256 public duration = 30 seconds; // 7 days
-    uint256 public rewardRate = 100;
 
     struct Stakeholder {
         address addr;
@@ -21,6 +19,7 @@ contract Staking is ERC20, Ownable {
         uint256 index;
         uint256 duration;
         uint256 rewardRate;
+        uint256 deletedAt;
     }
 
     struct Stake {
@@ -45,6 +44,11 @@ contract Staking is ERC20, Ownable {
 
     modifier onlyStakeholder() {
         require(isStakeholder(msg.sender), "Staking: caller is not the stakeholder");
+        _;
+    }
+
+    modifier validRewardPlanIndex(uint256 _index) {
+        require(_index < rewardPlans.length, "Staking: reward plan does not exist");
         _;
     }
 
@@ -76,10 +80,13 @@ contract Staking is ERC20, Ownable {
         return 2;
     }
 
-    function deposit(uint256 _amount)
+    function deposit(uint256 _amount, uint256 _rewardPlanIndex)
         public
+        validRewardPlanIndex(_rewardPlanIndex)
     {
         require(_amount > 0, "Staking: amount cannot be zero");
+        RewardPlan memory _rewardPlan = rewardPlans[_rewardPlanIndex];
+        require(_rewardPlan.deletedAt == 0, "Staking: reward plan does not exist");
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         if (!isStakeholder(msg.sender)) {
             _stakeholderIndex = register(msg.sender);
@@ -88,8 +95,8 @@ contract Staking is ERC20, Ownable {
             index: stakeholders[_stakeholderIndex].stakes.length,
             locked: _amount,
             unlocked: 0,
-            duration: duration,
-            rewardRate: rewardRate,
+            duration: _rewardPlan.duration,
+            rewardRate: _rewardPlan.rewardRate,
             rewardClaimed: 0,
             createdAt: block.timestamp
         }));
@@ -103,11 +110,11 @@ contract Staking is ERC20, Ownable {
     {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         Stake[] memory _stakes = stakeholders[_stakeholderIndex].stakes;
-        Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
-        require(_stakeIndex < _stakes.length, "Staking: invalid index");
-        require(_stake.locked > 0, "Staking: stake does not exist");
-        require(block.timestamp - _stake.createdAt > _stake.duration, "Staking: stake is still locked");
+        require(_stakeIndex < _stakes.length, "Staking: stake does not exist");
+        Stake memory _stake = _stakes[_stakeIndex];
         uint256 _locked = _stake.locked;
+        require(_locked > 0, "Staking: stake does not exist");
+        require(block.timestamp - _stake.createdAt > _stake.duration, "Staking: stake is still locked");
         uint256 _reward = calculateReward(_stake);
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].locked = 0;
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].unlocked = _locked;
@@ -149,18 +156,23 @@ contract Staking is ERC20, Ownable {
         public
         onlyOwner
     {
+        require(_duration > 0, "Staking: duration cannot be zero");
+        require(_rewardRate > 0, "Staking: reward rate cannot be zero");
         rewardPlans.push(RewardPlan({
             index: rewardPlans.length,
             duration: _duration,
-            rewardRate: _rewardRate
+            rewardRate: _rewardRate,
+            deletedAt: 0
         }));
     }
 
     function updateRewardPlan(uint256 _index, uint256 _duration, uint256 _rewardRate)
         public
         onlyOwner
+        validRewardPlanIndex(_index)
     {
-        require(_index < rewardPlans.length, "Staking: invalid index");
+        require(_duration > 0, "Staking: duration cannot be zero");
+        require(_rewardRate > 0, "Staking: reward rate cannot be zero");
         rewardPlans[_index].duration = _duration;
         rewardPlans[_index].rewardRate = _rewardRate;
     }
@@ -168,10 +180,10 @@ contract Staking is ERC20, Ownable {
     function removeRewardPlan(uint256 _index)
         public
         onlyOwner
+        validRewardPlanIndex(_index)
     {
-        require(_index < rewardPlans.length, "Staking: invalid index");
-        rewardPlans[_index].duration = 0;
-        rewardPlans[_index].rewardRate = 0;
+        require(rewardPlans[_index].deletedAt == 0, "Staking: reward plan does not exist");
+        rewardPlans[_index].deletedAt = block.timestamp;
     }
 
     function calculateReward(Stake memory _stake)
