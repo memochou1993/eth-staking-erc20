@@ -17,6 +17,12 @@ contract Staking is ERC20, Ownable {
         Stake[] stakes;
     }
 
+    struct RewardPlan {
+        uint256 index;
+        uint256 duration;
+        uint256 rewardRate;
+    }
+
     struct Stake {
         uint256 index;
         uint256 locked;
@@ -30,6 +36,8 @@ contract Staking is ERC20, Ownable {
     Stakeholder[] public stakeholders;
     mapping(address => uint256) public stakeholderIndexes;
 
+    RewardPlan[] public rewardPlans;
+
     constructor() ERC20("My Token", "MTK") {
         stakeholders.push();
         _mint(msg.sender, INITIAL_SUPPLY);
@@ -40,11 +48,22 @@ contract Staking is ERC20, Ownable {
         _;
     }
 
-    modifier validStakeIndex(uint256 _stakeIndex) {
+    function getRewardPlans()
+        external
+        view
+        returns (RewardPlan[] memory)
+    {
+        return rewardPlans;
+    }
+
+    function getStakes()
+        external
+        view
+        onlyStakeholder
+        returns (Stake[] memory)
+    {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
-        Stake[] memory _stakes = stakeholders[_stakeholderIndex].stakes;
-        require(_stakeIndex < _stakes.length && _stakes[_stakeIndex].locked > 0, "Staking: stake does not exist");
-        _;
+        return stakeholders[_stakeholderIndex].stakes;
     }
 
     function decimals()
@@ -81,10 +100,12 @@ contract Staking is ERC20, Ownable {
     function withdraw(uint256 _stakeIndex)
         public
         onlyStakeholder
-        validStakeIndex(_stakeIndex)
     {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
+        Stake[] memory _stakes = stakeholders[_stakeholderIndex].stakes;
         Stake memory _stake = stakeholders[_stakeholderIndex].stakes[_stakeIndex];
+        require(_stakeIndex < _stakes.length, "Staking: invalid index");
+        require(_stake.locked > 0, "Staking: stake does not exist");
         require(block.timestamp - _stake.createdAt > _stake.duration, "Staking: stake is still locked");
         uint256 _locked = _stake.locked;
         uint256 _reward = calculateReward(_stake);
@@ -103,14 +124,53 @@ contract Staking is ERC20, Ownable {
         return stakeholderIndexes[_stakeholder] != 0;
     }
 
-    function stakes()
+    function stakeholderCount()
         public
         view
-        onlyStakeholder
-        returns (Stake[] memory)
+        returns (uint256)
     {
-        uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
-        return stakeholders[_stakeholderIndex].stakes;
+        return stakeholders.length;
+    }
+
+    function hasRewardPlan(uint256 _duration, uint256 _rewardRate)
+        public
+        view
+        returns (bool)
+    {
+        for (uint256 i = 0; i < rewardPlans.length; i++) {
+            if (rewardPlans[i].duration == _duration && rewardPlans[i].rewardRate == _rewardRate) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function createRewardPlan(uint256 _duration, uint256 _rewardRate)
+        public
+        onlyOwner
+    {
+        rewardPlans.push(RewardPlan({
+            index: rewardPlans.length,
+            duration: _duration,
+            rewardRate: _rewardRate
+        }));
+    }
+
+    function updateRewardPlan(uint256 _index, uint256 _duration, uint256 _rewardRate)
+        public
+        onlyOwner
+    {
+        require(_index < rewardPlans.length, "Staking: invalid index");
+        rewardPlans[_index].duration = _duration;
+        rewardPlans[_index].rewardRate = _rewardRate;
+    }
+
+    function removeRewardPlan(uint256 _index)
+        public
+        onlyOwner
+    {
+        require(_index < rewardPlans.length, "Staking: invalid index");
+        delete rewardPlans[_index];
     }
 
     function calculateReward(Stake memory _stake)
@@ -120,14 +180,6 @@ contract Staking is ERC20, Ownable {
     {
         uint256 _rewardPerSecond = _stake.locked * _stake.rewardRate / 100 / 365 days;
         return (block.timestamp - _stake.createdAt) * _rewardPerSecond;
-    }
-
-    function stakeholderCount()
-        public
-        view
-        returns (uint256)
-    {
-        return stakeholders.length;
     }
 
     function register(address _stakeholder)
