@@ -5,6 +5,9 @@ new Vue({
     account: '',
     balanceOf: '',
     isStakeholder: false,
+    rewardPlans: [],
+    rewardPlanDuration: '',
+    rewardPlanRewardRage: '',
     stakes: [],
   },
   created() {
@@ -37,10 +40,10 @@ new Vue({
       this.decimals = (await this.contract.decimals()).toNumber();
       this.isStakeholder = await this.contract.isStakeholder(this.account);
       this.balanceOf = this.formatNumber((await this.contract.balanceOf(this.account)).toNumber());
-      if (!this.isStakeholder) {
-        return;
+      this.rewardPlans = (await this.contract.getRewardPlans(this.payload()));
+      if (this.isStakeholder) {
+        this.stakes = (await this.contract.getStakes(this.payload()));
       }
-      this.stakes = (await this.contract.stakes(this.payload()));
     },
     async deposit() {
       const amount = Number(this.amount) * (10 ** this.decimals);
@@ -50,6 +53,17 @@ new Vue({
     async withdraw(index) {
       await this.contract.withdraw(index, this.payload());
       window.location.reload();
+    },
+    async createRewardPlan() {
+      await this.contract.createRewardPlan(this.rewardPlanDuration, this.rewardPlanRewardRage, this.payload());
+      window.location.reload();
+    },
+    async removeRewardPlan(index) {
+      await this.contract.removeRewardPlan(index, this.payload());
+      window.location.reload();
+    },
+    isRemovedRewardPlan(rewardPlan) {
+      return Number(rewardPlan.duration) === 0 && Number(rewardPlan.rewardRate) === 0;
     },
     estimatedReward(stake) {
       const rewardPerSecond = Math.floor((stake.locked * stake.rewardRate) / 100 / 365 / 86400);

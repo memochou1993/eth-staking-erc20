@@ -170,7 +170,8 @@ contract Staking is ERC20, Ownable {
         onlyOwner
     {
         require(_index < rewardPlans.length, "Staking: invalid index");
-        delete rewardPlans[_index];
+        rewardPlans[_index].duration = 0;
+        rewardPlans[_index].rewardRate = 0;
     }
 
     function calculateReward(Stake memory _stake)

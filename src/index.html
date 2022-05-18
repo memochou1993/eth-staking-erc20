@@ -15,8 +15,10 @@
 <body hidden>
     <div id="root">
         <h1>Staking</h1>
-        <input v-model="amount" type="number" min="0">
-        <button @click="() => deposit()">Deposit</button>
+        <div>
+            <input v-model="amount" type="number" min="0" placeholder="amount">
+            <button @click="() => deposit()">Deposit</button>
+        </div>
         <div>account: {{ account }}</div>
         <div>balanceOf: {{ balanceOf }}</div>
         <div>isStakeholder: {{ isStakeholder }}</div>
@@ -26,7 +28,7 @@
                 <td>Locked</td>
                 <td>Unlocked</td>
                 <td>Duration (days)</td>
-                <td>APR</td>
+                <td>Reward Rate</td>
                 <td>Claimed Reward</td>
                 <td>Created At</td>
                 <td>Estimated Reward</td>
@@ -44,6 +46,26 @@
                 <td>{{ formatNumber(estimatedReward(stake)) }}</td>
                 <td>{{ formatNumber(estimatedTotalReward(stake)) }}</td>
                 <td><button :disabled="Number(stake.locked) < 1" @click="() => withdraw(stake.index)">Withdraw</button></td>
+            </tr>
+        </table>
+        <hr>
+        <div>
+            <input v-model="rewardPlanDuration" type="number" min="0" placeholder="Duration (days)">
+            <input v-model="rewardPlanRewardRage" type="number" min="0" placeholder="Reward Rage">
+            <button @click="() => createRewardPlan()">Create</button>
+        </div>
+        <table>
+            <tr>
+                <td>#</td>
+                <td>Duration (days)</td>
+                <td>Reward Rate</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr v-for="(rewardPlan, i) in rewardPlans" :key="rewardPlan.index">
+                <td>{{ i+1 }}</td>
+                <td>{{ rewardPlan.duration }}</td>
+                <td>{{ `${rewardPlan.rewardRate}%` }}</td>
+                <td><button :disabled="isRemovedRewardPlan(rewardPlan)" @click="() => removeRewardPlan(rewardPlan.index)">Remove</button></td>
             </tr>
         </table>
     </div>
