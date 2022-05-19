@@ -17,6 +17,7 @@ contract Staking is ERC20, Ownable {
 
     struct RewardPlan {
         uint256 index;
+        string name;
         uint256 duration;
         uint256 rewardRate;
         uint256 deletedAt;
@@ -24,12 +25,11 @@ contract Staking is ERC20, Ownable {
 
     struct Stake {
         uint256 index;
-        uint256 locked;
-        uint256 unlocked;
-        uint256 duration;
-        uint256 rewardRate;
+        uint256 amount;
         uint256 rewardClaimed;
-        uint256 createdAt;
+        RewardPlan rewardPlan;
+        uint256 lockedAt;
+        uint256 unlockedAt;
     }
 
     Stakeholder[] public stakeholders;
@@ -93,12 +93,11 @@ contract Staking is ERC20, Ownable {
         }
         stakeholders[_stakeholderIndex].stakes.push(Stake({
             index: stakeholders[_stakeholderIndex].stakes.length,
-            locked: _amount,
-            unlocked: 0,
-            duration: _rewardPlan.duration,
-            rewardRate: _rewardPlan.rewardRate,
+            amount: _amount,
             rewardClaimed: 0,
-            createdAt: block.timestamp
+            rewardPlan: _rewardPlan,
+            lockedAt: block.timestamp,
+            unlockedAt: 0
         }));
         _burn(msg.sender, _amount);
         // TODO: emit StakeCreated
@@ -112,14 +111,13 @@ contract Staking is ERC20, Ownable {
         Stake[] memory _stakes = stakeholders[_stakeholderIndex].stakes;
         require(_stakeIndex < _stakes.length, "Staking: stake does not exist");
         Stake memory _stake = _stakes[_stakeIndex];
-        uint256 _locked = _stake.locked;
-        require(_locked > 0, "Staking: stake does not exist");
-        require(block.timestamp - _stake.createdAt > _stake.duration, "Staking: stake is still locked");
+        uint256 _amount = _stake.amount;
+        require(_stake.unlockedAt == 0, "Staking: stake does not exist");
+        require(block.timestamp - _stake.lockedAt > _stake.rewardPlan.duration, "Staking: stake is still locked");
         uint256 _reward = calculateReward(_stake);
-        stakeholders[_stakeholderIndex].stakes[_stakeIndex].locked = 0;
-        stakeholders[_stakeholderIndex].stakes[_stakeIndex].unlocked = _locked;
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].rewardClaimed = _reward;
-        _mint(msg.sender, _locked + _reward);
+        stakeholders[_stakeholderIndex].stakes[_stakeIndex].unlockedAt = block.timestamp;
+        _mint(msg.sender, _amount + _reward);
         // TODO: emit StakeRemoved
     }
 
@@ -152,7 +150,7 @@ contract Staking is ERC20, Ownable {
         return false;
     }
 
-    function createRewardPlan(uint256 _duration, uint256 _rewardRate)
+    function createRewardPlan(string memory _name, uint256 _duration, uint256 _rewardRate)
         public
         onlyOwner
     {
@@ -160,21 +158,19 @@ contract Staking is ERC20, Ownable {
         require(_rewardRate > 0, "Staking: reward rate cannot be zero");
         rewardPlans.push(RewardPlan({
             index: rewardPlans.length,
+            name: _name,
             duration: _duration,
             rewardRate: _rewardRate,
             deletedAt: 0
         }));
     }
 
-    function updateRewardPlan(uint256 _index, uint256 _duration, uint256 _rewardRate)
+    function updateRewardPlan(uint256 _index, string memory _name)
         public
         onlyOwner
         validRewardPlanIndex(_index)
     {
-        require(_duration > 0, "Staking: duration cannot be zero");
-        require(_rewardRate > 0, "Staking: reward rate cannot be zero");
-        rewardPlans[_index].duration = _duration;
-        rewardPlans[_index].rewardRate = _rewardRate;
+        rewardPlans[_index].name = _name;
     }
 
     function removeRewardPlan(uint256 _index)
@@ -188,11 +184,10 @@ contract Staking is ERC20, Ownable {
 
     function calculateReward(Stake memory _stake)
         internal
-        view
+        pure
         returns (uint256)
     {
-        uint256 _rewardPerSecond = _stake.locked * _stake.rewardRate / 100 / 365 days;
-        return (block.timestamp - _stake.createdAt) * _rewardPerSecond;
+        return _stake.rewardPlan.duration * _stake.amount * _stake.rewardPlan.rewardRate / 100 / 365 days;
     }
 
     function register(address _stakeholder)

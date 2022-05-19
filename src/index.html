@@ -15,8 +15,9 @@
 <body hidden>
     <div id="root">
         <h1>Staking</h1>
+        <h2>User</h2>
         <div>
-            <input v-model="amount" type="number" min="0" placeholder="amount">
+            <input v-model="amount" type="number" min="0" placeholder="Amount">
             <select v-model="rewardPlanIndex">
                 <option v-for="(rewardPlan, i) in rewardPlans" :value="rewardPlan.index" v-show="Number(rewardPlan.deletedAt) === 0">
                     {{ `${rewardPlan.duration} seconds (APR ${rewardPlan.rewardRate}%)` }}
@@ -30,47 +31,50 @@
         <table>
             <tr>
                 <td>#</td>
-                <td>Locked</td>
-                <td>Unlocked</td>
+                <td>Amount</td>
                 <td>Duration (seconds)</td>
                 <td>Reward Rate (APR)</td>
                 <td>Claimed Reward</td>
-                <td>Created At</td>
+                <td>Locked At</td>
+                <td>Unlocked At</td>
                 <td>Estimated Reward</td>
                 <td>Estimated Total Reward</td>
                 <td>&nbsp;</td>
             </tr>
             <tr v-for="(stake, i) in stakes" :key="stake.index">
                 <td>{{ i+1 }}</td>
-                <td>{{ formatNumber(stake.locked) }}</td>
-                <td>{{ formatNumber(stake.unlocked) }}</td>
-                <td>{{ stake.duration }}</td>
-                <td>{{ `${stake.rewardRate}%` }}</td>
-                <td>{{ formatNumber(stake.rewardClaimed) }}</td>
-                <td>{{ stake.createdAt }}</td>
-                <td>{{ formatNumber(estimatedReward(stake)) }}</td>
+                <td>{{ formatNumber(stake.amount) }}</td>
+                <td>{{ stake.rewardPlan.duration }}</td>
+                <td>{{ `${stake.rewardPlan.rewardRate}%` }}</td>
+                <td>{{ formatNumber(stake.earned) }}</td>
+                <td>{{ stake.lockedAt }}</td>
+                <td>{{ stake.unlockedAt }}</td>
+                <td><text-updater :text="() => formatNumber(estimatedReward(stake))"></text-updater></td>
                 <td>{{ formatNumber(estimatedTotalReward(stake)) }}</td>
                 <td><button :disabled="Number(stake.locked) < 1" @click="() => withdraw(stake.index)">Withdraw</button></td>
             </tr>
         </table>
-        <hr>
+        <h2>Admin</h2>
         <div>
+            <input v-model="rewardPlanName" type="text" placeholder="Name">
             <input v-model="rewardPlanDuration" type="number" min="0" placeholder="Duration (seconds)">
-            <input v-model="rewardPlanRewardRage" type="number" min="0" placeholder="Reward Rage">
-            <button @click="() => createRewardPlan()">Create</button>
+            <input v-model="rewardPlanRewardRate" type="number" min="0" placeholder="Reward Rate">
+            <button @click="() => createRewardPlan()">Create Plan</button>
         </div>
         <table>
             <tr>
                 <td>#</td>
+                <td>Name</td>
                 <td>Duration (seconds)</td>
                 <td>Reward Rate (APR)</td>
                 <td>&nbsp;</td>
             </tr>
             <tr v-for="(rewardPlan, i) in rewardPlans" :key="rewardPlan.index">
                 <td>{{ i+1 }}</td>
+                <td>{{ rewardPlan.name }}</td>
                 <td>{{ rewardPlan.duration }}</td>
                 <td>{{ `${rewardPlan.rewardRate}%` }}</td>
-                <td><button :disabled="Number(rewardPlan.deletedAt) !== 0" @click="() => removeRewardPlan(rewardPlan.index)">Remove</button></td>
+                <td><button :disabled="Number(rewardPlan.deletedAt) !== 0" @click="() => removeRewardPlan(rewardPlan.index)">Remove Plan</button></td>
             </tr>
         </table>
     </div>

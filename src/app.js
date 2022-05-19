@@ -6,8 +6,9 @@ new Vue({
      */
     amount: '',
     rewardPlanIndex: '',
+    rewardPlanName: '',
     rewardPlanDuration: '',
-    rewardPlanRewardRage: '',
+    rewardPlanRewardRate: '',
     /**
      * display data
      */
@@ -62,7 +63,7 @@ new Vue({
       window.location.reload();
     },
     async createRewardPlan() {
-      await this.contract.createRewardPlan(this.rewardPlanDuration, this.rewardPlanRewardRage, this.payload());
+      await this.contract.createRewardPlan(this.rewardPlanName, this.rewardPlanDuration, this.rewardPlanRewardRate, this.payload());
       window.location.reload();
     },
     async removeRewardPlan(index) {
@@ -70,11 +71,13 @@ new Vue({
       window.location.reload();
     },
     estimatedReward(stake) {
-      const rewardPerSecond = Math.floor((stake.locked * stake.rewardRate) / 100 / 365 / 86400);
-      return (Math.floor(+new Date() / 1000) - stake.createdAt) * rewardPerSecond;
+      const duration = Math.floor(+new Date() / 1000) - stake.lockedAt;
+      const reward = (((duration * stake.amount * stake.rewardPlan.rewardRate) / 100) / 365) / 86400;
+      const total = this.estimatedTotalReward(stake);
+      return reward > total ? total : reward;
     },
     estimatedTotalReward(stake) {
-      return Math.floor((((stake.locked * stake.rewardRate) / 100) / 365) * 7);
+      return (((stake.rewardPlan.duration * stake.amount * stake.rewardPlan.rewardRate) / 100) / 365) / 86400;
     },
     formatNumber(number) {
       return (number / (10 ** this.decimals)).toFixed(this.decimals);
@@ -87,6 +90,27 @@ new Vue({
       };
     },
   },
+});
+
+Vue.component('TextUpdater', {
+  name: 'TextUpdater',
+  props: {
+    text: {
+      type: Function,
+      default: () => {},
+    },
+  },
+  data() {
+    return {
+      display: '',
+    };
+  },
+  created() {
+    setInterval(() => {
+      this.display = this.text();
+    }, 1000);
+  },
+  template: '<span>{{ display }}</span>',
 });
 
 window.onload = () => document.body.removeAttribute('hidden');
