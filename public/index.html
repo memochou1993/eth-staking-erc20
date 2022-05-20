@@ -23,7 +23,7 @@
                     {{ `${rewardPlan.duration} seconds (APR ${rewardPlan.rewardRate}%)` }}
                 </option>
             </select>
-            <button @click="() => deposit()">Deposit</button>
+            <button @click="() => createStake()">Create Stake</button>
         </div>
         <div>account: {{ account }}</div>
         <div>balanceOf: {{ balanceOf }}</div>
@@ -51,7 +51,7 @@
                 <td>{{ stake.unlockedAt }}</td>
                 <td><text-updater :text="() => formatNumber(estimatedReward(stake))"></text-updater></td>
                 <td>{{ formatNumber(estimatedTotalReward(stake)) }}</td>
-                <td><button :disabled="Number(stake.unlockedAt) != 0" @click="() => withdraw(stake.index)">Withdraw</button></td>
+                <td><button :disabled="Number(stake.unlockedAt) != 0" @click="() => removeStake(stake.index)">Remove Stake</button></td>
             </tr>
         </table>
         <h2>Admin</h2>

@@ -53,13 +53,13 @@ new Vue({
         this.stakes = (await this.contract.getStakes(this.payload()));
       }
     },
-    async deposit() {
+    async createStake() {
       const amount = Number(this.amount) * (10 ** this.decimals);
-      await this.contract.deposit(amount, this.rewardPlanIndex, this.payload());
+      await this.contract.createStake(amount, this.rewardPlanIndex, this.payload());
       window.location.reload();
     },
-    async withdraw(index) {
-      await this.contract.withdraw(index, this.payload());
+    async removeStake(index) {
+      await this.contract.removeStake(index, this.payload());
       window.location.reload();
     },
     async createRewardPlan() {
