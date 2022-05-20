@@ -3,7 +3,7 @@ eth-staking
 
 ## Quick Start
 
-Use [Remix](https://remix.ethereum.org/) IDE to develop smart contracts, or follow the steps below to build a local development environment.
+Try smart contracts with [Remix](https://remix.ethereum.org/) IDE, or follow the steps below to build a local development environment.
 
 1. Install and run [Ganache](https://trufflesuite.com/ganache/).
 
