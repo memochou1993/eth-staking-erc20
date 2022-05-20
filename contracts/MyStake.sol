@@ -46,12 +46,12 @@ contract MyStake is Ownable {
     }
 
     modifier onlyStakeholder() {
-        require(isStakeholder(msg.sender), "Staking: caller is not the stakeholder");
+        require(isStakeholder(msg.sender), "MyStake: caller is not the stakeholder");
         _;
     }
 
     modifier validRewardPlanIndex(uint256 _index) {
-        require(_index < rewardPlans.length, "Staking: reward plan does not exist");
+        require(_index < rewardPlans.length, "MyStake: reward plan does not exist");
         _;
     }
 
@@ -85,9 +85,9 @@ contract MyStake is Ownable {
         public
         validRewardPlanIndex(_rewardPlanIndex)
     {
-        require(_amount > 0, "Staking: amount cannot be zero");
+        require(_amount > 0, "MyStake: amount cannot be zero");
         RewardPlan memory _rewardPlan = rewardPlans[_rewardPlanIndex];
-        require(_rewardPlan.deletedAt == 0, "Staking: reward plan does not exist");
+        require(_rewardPlan.deletedAt == 0, "MyStake: reward plan does not exist");
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         if (!isStakeholder(msg.sender)) {
             _stakeholderIndex = register(msg.sender);
@@ -110,11 +110,11 @@ contract MyStake is Ownable {
     {
         uint256 _stakeholderIndex = stakeholderIndexes[msg.sender];
         Stake[] memory _stakes = stakeholders[_stakeholderIndex].stakes;
-        require(_stakeIndex < _stakes.length, "Staking: stake does not exist");
+        require(_stakeIndex < _stakes.length, "MyStake: stake does not exist");
         Stake memory _stake = _stakes[_stakeIndex];
         uint256 _amount = _stake.amount;
-        require(_stake.unlockedAt == 0, "Staking: stake does not exist");
-        require(block.timestamp - _stake.lockedAt > _stake.rewardPlan.duration, "Staking: stake is still locked");
+        require(_stake.unlockedAt == 0, "MyStake: stake does not exist");
+        require(block.timestamp - _stake.lockedAt > _stake.rewardPlan.duration, "MyStake: stake is still locked");
         uint256 _reward = calculateReward(_stake);
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].rewardClaimed = _reward;
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].unlockedAt = block.timestamp;
@@ -142,8 +142,8 @@ contract MyStake is Ownable {
         public
         onlyOwner
     {
-        require(_duration > 0, "Staking: duration cannot be zero");
-        require(_rewardRate > 0, "Staking: reward rate cannot be zero");
+        require(_duration > 0, "MyStake: duration cannot be zero");
+        require(_rewardRate > 0, "MyStake: reward rate cannot be zero");
         rewardPlans.push(RewardPlan({
             index: rewardPlans.length,
             name: _name,
@@ -166,7 +166,7 @@ contract MyStake is Ownable {
         onlyOwner
         validRewardPlanIndex(_index)
     {
-        require(rewardPlans[_index].deletedAt == 0, "Staking: reward plan does not exist");
+        require(rewardPlans[_index].deletedAt == 0, "MyStake: reward plan does not exist");
         rewardPlans[_index].deletedAt = block.timestamp;
     }
 
