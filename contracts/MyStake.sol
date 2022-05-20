@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract Staking is ERC20, Ownable {
+contract MyStake is ERC20, Ownable {
     using SafeMath for uint256;
 
     uint256 public constant INITIAL_SUPPLY = 1e10;

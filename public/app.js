@@ -37,7 +37,7 @@ new Vue({
       this.account = account;
     },
     async loadContract() {
-      const contract = TruffleContract(await fetch('Staking.json').then((r) => r.json()));
+      const contract = TruffleContract(await fetch('MyStake.json').then((r) => r.json()));
       contract.setProvider(await detectEthereumProvider());
       this.contract = await contract.deployed();
     },
