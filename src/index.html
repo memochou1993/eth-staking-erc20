@@ -34,7 +34,7 @@
                 <td>Amount</td>
                 <td>Duration (seconds)</td>
                 <td>Reward Rate (APR)</td>
-                <td>Claimed Reward</td>
+                <td>Earned</td>
                 <td>Locked At</td>
                 <td>Unlocked At</td>
                 <td>Estimated Reward</td>
@@ -46,12 +46,12 @@
                 <td>{{ formatNumber(stake.amount) }}</td>
                 <td>{{ stake.rewardPlan.duration }}</td>
                 <td>{{ `${stake.rewardPlan.rewardRate}%` }}</td>
-                <td>{{ formatNumber(stake.earned) }}</td>
+                <td>{{ formatNumber(stake.rewardClaimed) }}</td>
                 <td>{{ stake.lockedAt }}</td>
                 <td>{{ stake.unlockedAt }}</td>
                 <td><text-updater :text="() => formatNumber(estimatedReward(stake))"></text-updater></td>
                 <td>{{ formatNumber(estimatedTotalReward(stake)) }}</td>
-                <td><button :disabled="Number(stake.locked) < 1" @click="() => withdraw(stake.index)">Withdraw</button></td>
+                <td><button :disabled="Number(stake.unlockedAt) != 0" @click="() => withdraw(stake.index)">Withdraw</button></td>
             </tr>
         </table>
         <h2>Admin</h2>
