@@ -2,13 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract MyStake is ERC20, Ownable {
+contract MyStake is Ownable {
+    using SafeERC20 for IERC20;
     using SafeMath for uint256;
-
-    uint256 public constant INITIAL_SUPPLY = 1e10;
 
     struct Stakeholder {
         address addr;
@@ -32,14 +31,18 @@ contract MyStake is ERC20, Ownable {
         uint256 unlockedAt;
     }
 
+    address private _owner;
+    IERC20 public token;
+ 
     Stakeholder[] public stakeholders;
     mapping(address => uint256) public stakeholderIndexes;
 
     RewardPlan[] public rewardPlans;
 
-    constructor() ERC20("My Token", "MTK") {
+    constructor(address _token) {
+        _owner = msg.sender;
+        token = IERC20(_token);
         stakeholders.push();
-        _mint(msg.sender, INITIAL_SUPPLY);
     }
 
     modifier onlyStakeholder() {
@@ -50,6 +53,14 @@ contract MyStake is ERC20, Ownable {
     modifier validRewardPlanIndex(uint256 _index) {
         require(_index < rewardPlans.length, "Staking: reward plan does not exist");
         _;
+    }
+
+    function balance()
+        public
+        view
+        returns (uint256)
+    {
+        return token.balanceOf(address(this));
     }
 
     function getRewardPlans()
@@ -70,17 +81,7 @@ contract MyStake is ERC20, Ownable {
         return stakeholders[_stakeholderIndex].stakes;
     }
 
-    function decimals()
-        public
-        view
-        virtual
-        override
-        returns (uint8)
-    {
-        return 2;
-    }
-
-    function deposit(uint256 _amount, uint256 _rewardPlanIndex)
+    function createStake(uint256 _amount, uint256 _rewardPlanIndex)
         public
         validRewardPlanIndex(_rewardPlanIndex)
     {
@@ -99,11 +100,11 @@ contract MyStake is ERC20, Ownable {
             lockedAt: block.timestamp,
             unlockedAt: 0
         }));
-        _burn(msg.sender, _amount);
+        token.safeTransferFrom(msg.sender, address(this), _amount);
         // TODO: emit StakeCreated
     }
 
-    function withdraw(uint256 _stakeIndex)
+    function removeStake(uint256 _stakeIndex)
         public
         onlyStakeholder
     {
@@ -117,7 +118,7 @@ contract MyStake is ERC20, Ownable {
         uint256 _reward = calculateReward(_stake);
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].rewardClaimed = _reward;
         stakeholders[_stakeholderIndex].stakes[_stakeIndex].unlockedAt = block.timestamp;
-        _mint(msg.sender, _amount + _reward);
+        token.safeTransfer(msg.sender, _amount + _reward); // FIXME
         // TODO: emit StakeRemoved
     }
 
@@ -135,19 +136,6 @@ contract MyStake is ERC20, Ownable {
         returns (uint256)
     {
         return stakeholders.length;
-    }
-
-    function hasRewardPlan(uint256 _duration, uint256 _rewardRate)
-        public
-        view
-        returns (bool)
-    {
-        for (uint256 i = 0; i < rewardPlans.length; i++) {
-            if (rewardPlans[i].duration == _duration && rewardPlans[i].rewardRate == _rewardRate) {
-                return true;
-            }
-        }
-        return false;
     }
 
     function createRewardPlan(string memory _name, uint256 _duration, uint256 _rewardRate)
