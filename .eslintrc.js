@@ -13,4 +13,15 @@ module.exports = {
     'no-new': 'off',
     'no-undef': 'off',
   },
+  overrides: [
+    {
+      files: [
+        'test/**/*.js',
+      ],
+      rules: {
+        'no-underscore-dangle': 'off',
+        'no-promise-executor-return': 'off',
+      },
+    },
+  ],
 };

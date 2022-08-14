@@ -7,10 +7,15 @@
     "test": "test"
   },
   "scripts": {
-    "dev": "lite-server",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "truffle compile && vite build",
+    "preview": "vite preview",
+    "compile": "bash scripts/compile.sh",
+    "migrate": "truffle migrate",
+    "verify": "truffle run verify",
+    "test": "truffle run coverage",
     "lint:sol": "solium -d contracts",
-    "lint:js": "eslint src migrations",
+    "lint:js": "eslint src --ext .js",
     "lint": "npm run lint:sol && npm run lint:js"
   },
   "author": "",
@@ -20,14 +25,20 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.6.0",
+    "@truffle/hdwallet-provider": "^2.0.8",
+    "dotenv": "^16.0.1",
+    "ethers": "^5.6.8",
+    "vite": "^2.9.10",
     "vue": "^2.6.14"
   },
   "devDependencies": {
-    "@metamask/detect-provider": "^1.2.0",
-    "@truffle/contract": "^4.5.9",
+    "chai": "^4.3.6",
     "eslint": "^8.15.0",
     "eslint-config-airbnb": "^19.0.4",
     "ethlint": "^1.2.5",
-    "lite-server": "^2.6.1"
+    "solc": "^0.8.13",
+    "solidity-coverage": "^0.8.0-beta.1",
+    "truffle": "^5.5.21",
+    "truffle-plugin-verify": "^0.5.27"
   }
 }

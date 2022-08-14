@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite App</title>
+</head>
+<body hidden>
+  <div id="app">
+    <h1>Staking</h1>
+    <h2>User</h2>
+    <div>
+      <button :disabled="allowance > 0" @click="() => approve()">Enable</button>
+    </div>
+    <div>
+      <input v-model="stakeAmount" type="number" min="0" step="0.01" placeholder="Stake Amount">
+      <select v-model="rewardPlanIndex">
+        <option v-for="(rewardPlan, i) in rewardPlans" :value="rewardPlan.index" v-show="Number(rewardPlan.deletedAt) === 0">
+          {{ `${rewardPlan.duration} seconds (APR ${formatRewardRateNumber(rewardPlan.rate)}%)` }}
+        </option>
+      </select>
+      <button :disabled="allowance < 1" @click="() => createStake()">Create Stake</button>
+    </div>
+    <div>account: {{ account }}</div>
+    <div>balanceOf: {{ formatNumber(balanceOf) }}</div>
+    <div>isStakeholder: {{ isStakeholder }}</div>
+    <table>
+      <tr>
+        <td>#</td>
+        <td>Amount</td>
+        <td>Reward Duration (seconds)</td>
+        <td>Reward Rate (APR)</td>
+        <td>Created At</td>
+        <td>Estimated Reward</td>
+        <td>Estimated Total Reward</td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr v-for="(stake, i) in stakes" :key="`key-${stake.index}`">
+        <td>{{ i+1 }}</td>
+        <td>{{ formatNumber(stake.amount) }}</td>
+        <td>{{ rewardPlanOf(stake)?.duration }}</td>
+        <td>{{ `${formatRewardRateNumber(rewardPlanOf(stake)?.rate)}%` }}</td>
+        <td>{{ stake.createdAt }}</td>
+        <td><text-updater :text="() => formatNumber(estimatedReward(stake))"></text-updater></td>
+        <td>{{ formatNumber(estimatedTotalReward(stake)) }}</td>
+        <td><button :disabled="!isUnlockable(stake) || Number(stake.amount) < 1" @click="() => removeStake(stake.index)">Remove Stake</button></td>
+      </tr>
+    </table>
+    <h2>Admin</h2>
+    <div>
+      <input v-model="rewardAmount" type="text" placeholder="Reward Amount">
+      <button :disabled="allowance < 1" @click="() => addReward()">Add Reward</button>
+    </div>
+    <div>
+      <input v-model="rewardPlanName" type="text" placeholder="Name">
+      <input v-model="rewardPlanDuration" type="number" min="0" placeholder="Duration (seconds)">
+      <input v-model="rewardPlanRate" type="number" min="0" step="0.01" placeholder="Rate (APR)">
+      <button :disabled="allowance < 1" @click="() => createRewardPlan()">Create Plan</button>
+    </div>
+    <div>
+      <select v-model="rewardPlanIndexForUpdate">
+        <option v-for="(rewardPlan, i) in rewardPlans" :value="rewardPlan.index" v-show="Number(rewardPlan.deletedAt) === 0">
+          {{ `${rewardPlan.duration} seconds (APR ${formatRewardRateNumber(rewardPlan.rate)}%)` }}
+        </option>
+      </select>
+      <input v-model="rewardPlanNameForUpdate" type="text" placeholder="Name">
+      <button :disabled="allowance < 1" @click="() => updateRewardPlan()">Update Plan</button>
+    </div>
+    <div>totalStaked: {{ formatNumber(totalStaked) }}</div>
+    <div>rewardPool.total: {{ formatNumber(rewardPool?.total) }}</div>
+    <div>rewardPool.available: {{ formatNumber(rewardPool?.available) }}</div>
+    <table>
+      <tr>
+        <td>#</td>
+        <td>Name</td>
+        <td>Duration (seconds)</td>
+        <td>Rate (APR)</td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr v-for="(rewardPlan, i) in rewardPlans" :key="`key-${rewardPlan.index}`">
+        <td>{{ i+1 }}</td>
+        <td>{{ rewardPlan.name }}</td>
+        <td>{{ rewardPlan.duration }}</td>
+        <td>{{ `${formatRewardRateNumber(rewardPlan.rate)}%` }}</td>
+        <td><button :disabled="Number(rewardPlan.deletedAt) !== 0" @click="() => removeRewardPlan(rewardPlan.index)">Remove Plan</button></td>
+      </tr>
+    </table>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

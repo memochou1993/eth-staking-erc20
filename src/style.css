@@ -1,0 +1,15 @@
+div {
+  margin: 12px 0;
+}
+
+hr {
+  margin: 12px 0;
+}
+
+table, th, td {
+  border: 1px solid;
+}
+
+td {
+  min-width: 60px;
+}
