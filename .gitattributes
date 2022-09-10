@@ -1,1 +1,3 @@
-scripts/**, src/**, test/** linguist-vendored
+scripts/** linguist-vendored
+src/** linguist-vendored
+test/** linguist-vendored
